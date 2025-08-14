@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: html}">
+<head>
+    <title>Thêm Khuyến mãi</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <!-- Page Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fas fa-plus me-2"></i>Thêm mới Khuyến mãi</h2>
+            <a href="/promotions" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Quay lại
+            </a>
+        </div>
+
+        <!-- Add Form -->
+        <div class="card">
+            <div class="card-body">
+                <form th:action="@{/promotions/add}" th:object="${promotion}" method="post" class="needs-validation" novalidate>
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="title" class="form-label">Tiêu đề <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="title" th:field="*{title}" 
+                                   th:classappend="${#fields.hasErrors('title')} ? 'is-invalid' : ''" 
+                                   placeholder="Nhập tiêu đề khuyến mãi" required>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="startTime" class="form-label">Thời gian bắt đầu <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="startTime" th:field="*{startTime}" 
+                                   th:classappend="${#fields.hasErrors('startTime')} ? 'is-invalid' : ''" 
+                                   placeholder="dd/MM/yyyy" required>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('startTime')}" th:errors="*{startTime}"></div>
+                            <small class="form-text text-muted">Phải lớn hơn thời gian hiện tại</small>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="endTime" class="form-label">Thời gian kết thúc <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="endTime" th:field="*{endTime}" 
+                                   th:classappend="${#fields.hasErrors('endTime')} ? 'is-invalid' : ''" 
+                                   placeholder="dd/MM/yyyy" required>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('endTime')}" th:errors="*{endTime}"></div>
+                            <small class="form-text text-muted">Phải lớn hơn ngày bắt đầu ít nhất 1 ngày</small>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="discountAmount" class="form-label">Mức giảm giá (VNĐ) <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="discountAmount" th:field="*{discountAmount}" 
+                                   th:classappend="${#fields.hasErrors('discountAmount')} ? 'is-invalid' : ''" 
+                                   placeholder="0" min="10000" required>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('discountAmount')}" th:errors="*{discountAmount}"></div>
+                            <small class="form-text text-muted">Phải lớn hơn 10,000 VNĐ</small>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="details" class="form-label">Chi tiết <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="details" th:field="*{details}" rows="3" 
+                                      th:classappend="${#fields.hasErrors('details')} ? 'is-invalid' : ''" 
+                                      placeholder="Nhập chi tiết khuyến mãi" required></textarea>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('details')}" th:errors="*{details}"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="/promotions" class="btn btn-secondary">
+                            <i class="fas fa-times me-2"></i>Hủy bỏ
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Thêm mới
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div th:fragment="scripts">
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Initialize date inputs
+                const dateInputs = document.querySelectorAll('input[placeholder*="dd/MM/yyyy"]');
+                dateInputs.forEach(input => {
+                    input.addEventListener('focus', function() {
+                        this.type = 'date';
+                    });
+                    input.addEventListener('blur', function() {
+                        if (!this.value) {
+                            this.type = 'text';
+                        }
+                    });
+                });
+
+                // Form validation
+                const form = document.querySelector('.needs-validation');
+                form.addEventListener('submit', function(event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                });
+
+                // Custom date validation
+                const startTimeInput = document.getElementById('startTime');
+                const endTimeInput = document.getElementById('endTime');
+                
+                function validateDates() {
+                    const startTime = new Date(startTimeInput.value);
+                    const endTime = new Date(endTimeInput.value);
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    
+                    if (startTime <= today) {
+                        startTimeInput.setCustomValidity('Thời gian bắt đầu phải lớn hơn thời gian hiện tại');
+                    } else {
+                        startTimeInput.setCustomValidity('');
+                    }
+                    
+                    if (endTime <= startTime) {
+                        endTimeInput.setCustomValidity('Thời gian kết thúc phải lớn hơn thời gian bắt đầu ít nhất 1 ngày');
+                    } else {
+                        endTimeInput.setCustomValidity('');
+                    }
+                }
+                
+                startTimeInput.addEventListener('change', validateDates);
+                endTimeInput.addEventListener('change', validateDates);
+            });
+        </script>
+    </div>
+</body>
+</html>
